@@ -12,10 +12,10 @@ int cargar_palabras(const char *nombre_archivo, char palabras[MAX_PALABRAS][MAX_
 void elegir_palabra(char palabras[MAX_PALABRAS][MAX_PALABRA], int total, char *palabra_elegida);
 
 // dibuja el muñequito del ahorcado segun los errores que lleva
-void dibujar_ahorcado(int errores);
+void dibujar_ahorcado(int errores, int f_base);
 
 // muestra la palabra con guiones bajos en las letras que faltan
-void mostrar_progreso(const char *palabra, int *adivinadas, int largo);
+void mostrar_progreso(const char *palabra, int *adivinadas, int largo, int f, int c);
 
 // revisa si una letra ya fue usada antes
 int letra_ya_usada(char letra, char *usadas, int cantidad_usadas);
