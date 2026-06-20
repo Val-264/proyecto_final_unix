@@ -54,7 +54,7 @@ void dibujar_ahorcado(int errores) {
     }
 
     printf("      |\n");
-    printf("=========\n");
+    printf("---------\n");
     printf("Intentos fallados: %d de %d\n\n", errores, MAX_INTENTOS);
 }
 
@@ -90,7 +90,7 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
     int errores = 0;
     int letras_correctas = 0;
 
-    printf("\n¡Empieza el juego! La palabra tiene %d letras.\n", largo);
+    printf("\n¡Comienza el juego! La palabra tiene %d letras\n", largo);
 
     while (errores < MAX_INTENTOS && letras_correctas < largo) {
         dibujar_ahorcado(errores);
@@ -108,12 +108,12 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
         char letra = toupper(entrada[0]);
 
         if (!isalpha(letra)) {
-            printf("Eso no es una letra valida, intenta de nuevo.\n");
+            printf("Eso no es una letra valida, intenta de nuevo\n");
             continue;
         }
 
         if (letra_ya_usada(letra, letras_usadas, cantidad_usadas)) {
-            printf("Ya intentaste con esa letra, prueba otra.\n");
+            printf("Ya intentaste con esa letra, prueba otra\n");
             continue;
         }
 
@@ -131,17 +131,17 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
 
         if (!acerto) {
             errores++;
-            printf("Esa letra no esta en la palabra.\n");
+            printf("Esa letra no esta en la palabra\n");
         } else {
-            printf("¡Bien! Esa letra si esta.\n");
+            printf("¡Bien! esa letra si esta\n");
         }
     }
 
     dibujar_ahorcado(errores);
 
     if (letras_correctas == largo) {
-        printf("¡Felicidades, ganaste! La palabra era: %s\n", palabra);
+        printf("¡Felicidades! ganaste :) La palabra era: %s\n", palabra);
     } else {
-        printf("Perdiste. La palabra era: %s\n", palabra);
+        printf("Perdiste :( la palabra era: %s\n", palabra);
     }
 }

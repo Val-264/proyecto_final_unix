@@ -17,12 +17,12 @@ int main() {
     int opcion;
 
     do {
-        printf("====================================\n");
+        printf("------------------------------------\n");
         printf("         JUEGO DEL AHORCADO\n");
-        printf("====================================\n");
-        printf("1) Jugar\n");
-        printf("2) Salir\n");
-        printf("====================================\n");
+        printf("------------------------------------\n");
+        printf("1. Jugar\n");
+        printf("2. Salir\n");
+        printf("------------------------------------\n");
         printf("Elige una opcion: ");
         scanf("%d", &opcion);
 
@@ -30,12 +30,12 @@ int main() {
             jugar_partida(palabras, total_palabras);
             printf("\n");
         } else if (opcion != 2) {
-            printf("Opcion invalida, intenta de nuevo.\n");
+            printf("Opcion invalida, intenta de nuevo\n");
         }
 
     } while (opcion != 2);
 
-    printf("Gracias por jugar. ¡Hasta luego!\n");
+    printf("¡Gracias por jugar Hasta luego!\n");
 
     return 0;
 }
