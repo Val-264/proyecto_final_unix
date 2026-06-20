@@ -42,14 +42,22 @@ chmod +x gestor.sh
 ```
 
 ### 4. Ejecutar la Parte 2 (Hangman en C)
-
+Antes de ejecutar debes tener instalado ncurses 
+```bash
+sudo apt update && sudo apt install libncurses5-dev libncursesw5-dev
+```
+Luego ejecuta
 ```bash
 cd Parte2_C_Hangman
 sed -i 's/\r$//' palabras.txt
 make
 ./hangman
 ```
-
+Tambien puedes hacer simplemente 
+```bash
+cd Parte2_C_Hangman
+make run
+```
 ## Errores comunes
 
 | Error | Solución |
