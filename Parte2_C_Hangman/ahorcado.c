@@ -3,20 +3,20 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
+#include <ncurses.h> 
 #include "ahorcado.h"
 
 int cargar_palabras(const char *nombre_archivo, char palabras[MAX_PALABRAS][MAX_PALABRA]) {
     FILE *archivo = fopen(nombre_archivo, "r");
     if (archivo == NULL) {
+        // Como ncurses podría no estar iniciado aún, usamos un print estándar
         printf("No se pudo abrir el archivo %s\n", nombre_archivo);
         return 0;
     }
 
     int contador = 0;
     while (contador < MAX_PALABRAS && fgets(palabras[contador], MAX_PALABRA, archivo) != NULL) {
-        // quita el salto de linea que deja fgets al final (\n en linux, \r\n en windows)
         palabras[contador][strcspn(palabras[contador], "\r\n")] = '\0';
-        // si la linea no quedo vacia, la cuenta como palabra valida
         if (strlen(palabras[contador]) > 0) {
             contador++;
         }
@@ -31,43 +31,43 @@ void elegir_palabra(char palabras[MAX_PALABRAS][MAX_PALABRA], int total, char *p
     strcpy(palabra_elegida, palabras[indice]);
 }
 
-void dibujar_ahorcado(int errores) {
-    printf("\n");
-    printf("  +---+\n");
-    printf("  |   |\n");
-    printf("  %c   |\n", errores >= 1 ? 'O' : ' ');
+// Ahora recibe la fila base para saber dónde dibujarse
+void dibujar_ahorcado(int errores, int f_base) {
+    mvprintw(f_base + 0, 5, "  +---+");
+    mvprintw(f_base + 1, 5, "  |   |");
+    mvprintw(f_base + 2, 5, "  %c   |", (errores >= 1 ? 'O' : ' '));
 
     if (errores >= 4) {
-        printf(" %c%c%c  |\n", errores >= 3 ? '/' : ' ', errores >= 2 ? '|' : ' ', errores >= 4 ? '\\' : ' ');
+        mvprintw(f_base + 3, 5, " %c%c%c  |", (errores >= 3 ? '/' : ' '), (errores >= 2 ? '|' : ' '), (errores >= 4 ? '\\' : ' '));
     } else if (errores >= 2) {
-        printf("  %c%c  |\n", errores >= 3 ? '/' : ' ', errores >= 2 ? '|' : ' ');
+        mvprintw(f_base + 3, 5, "  %c%c  |", (errores >= 3 ? '/' : ' '), (errores >= 2 ? '|' : ' '));
     } else {
-        printf("      |\n");
+        mvprintw(f_base + 3, 5, "      |");
     }
 
     if (errores >= 6) {
-        printf(" %c %c  |\n", '/', '\\');
+        mvprintw(f_base + 4, 5, " %c %c  |", '/', '\\');
     } else if (errores >= 5) {
-        printf(" %c    |\n", '/');
+        mvprintw(f_base + 4, 5, " %c    |", '/');
     } else {
-        printf("      |\n");
+        mvprintw(f_base + 4, 5, "      |");
     }
 
-    printf("      |\n");
-    printf("---------\n");
-    printf("Intentos fallados: %d de %d\n\n", errores, MAX_INTENTOS);
+    mvprintw(f_base + 5, 5, "      |");
+    mvprintw(f_base + 6, 5, "=========");
+    mvprintw(f_base + 8, 5, "Intentos fallados: %d de %d", errores, MAX_INTENTOS);
 }
 
-void mostrar_progreso(const char *palabra, int *adivinadas, int largo) {
-    printf("Palabra: ");
+// Imprime el progreso en una coordenada específica (f, c)
+void mostrar_progreso(const char *palabra, int *adivinadas, int largo, int f, int c) {
+    mvprintw(f, c, "Palabra: ");
     for (int i = 0; i < largo; i++) {
         if (adivinadas[i]) {
-            printf("%c ", palabra[i]);
+            printw("%c ", palabra[i]); // printw añade texto de forma contigua
         } else {
-            printf("_ ");
+            printw("_ ");
         }
     }
-    printf("\n");
 }
 
 int letra_ya_usada(char letra, char *usadas, int cantidad_usadas) {
@@ -80,6 +80,12 @@ int letra_ya_usada(char letra, char *usadas, int cantidad_usadas) {
 }
 
 void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
+    // --- 1. INICIALIZAR NCURSES ---
+    initscr();
+    cbreak();
+    noecho();
+    keypad(stdscr, TRUE);
+
     char palabra[MAX_PALABRA];
     elegir_palabra(palabras, total, palabra);
 
@@ -90,30 +96,43 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
     int errores = 0;
     int letras_correctas = 0;
 
-    printf("\n¡Comienza el juego! La palabra tiene %d letras\n", largo);
+    // Mensaje estático superior
+    mvprintw(1, 5, "¡Comienza el juego! La palabra tiene %d letras", largo);
+
+    // Cadena para guardar el estado del último intento
+    char mensaje_feedback[100] = "¡Buena suerte!";
 
     while (errores < MAX_INTENTOS && letras_correctas < largo) {
-        dibujar_ahorcado(errores);
-        mostrar_progreso(palabra, adivinadas, largo);
+        clear(); // Limpia la pantalla para evitar "fantasmas" visuales
+        mvprintw(1, 5, "¡Comienza el juego! La palabra tiene %d letras", largo);
+        
+        // Dibujamos los componentes fijos en coordenadas ordenadas
+        dibujar_ahorcado(errores, 3); // Ocupa desde fila 3 hasta la 11
+        mostrar_progreso(palabra, adivinadas, largo, 5, 30); // Fila 5, Columna 30
 
-        printf("Letras usadas: ");
+        // Mostrar letras usadas a la derecha
+        mvprintw(7, 30, "Letras usadas: ");
         for (int i = 0; i < cantidad_usadas; i++) {
-            printf("%c ", letras_usadas[i]);
+            printw("%c ", letras_usadas[i]);
         }
-        printf("\n");
 
-        printf("Ingresa una letra: ");
-        char entrada[10];
-        scanf("%9s", entrada);
-        char letra = toupper(entrada[0]);
+        // Mostrar el resultado de la última acción debajo
+        mvprintw(13, 5, "%s", mensaje_feedback);
+
+        // Pedir la letra de forma instantánea sin Enter
+        mvprintw(15, 5, "Ingresa una letra: ");
+        refresh(); // Obligatorio para renderizar los cambios en la terminal
+
+        int ch = getch(); // Captura un único carácter inmediatamente
+        char letra = toupper(ch);
 
         if (!isalpha(letra)) {
-            printf("Eso no es una letra valida, intenta de nuevo\n");
+            strcpy(mensaje_feedback, "Eso no es una letra valida, intenta de nuevo.");
             continue;
         }
 
         if (letra_ya_usada(letra, letras_usadas, cantidad_usadas)) {
-            printf("Ya intentaste con esa letra, prueba otra\n");
+            strcpy(mensaje_feedback, "Ya intentaste con esa letra, prueba otra.");
             continue;
         }
 
@@ -122,7 +141,9 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
 
         int acerto = 0;
         for (int i = 0; i < largo; i++) {
-            if (palabra[i] == letra) {
+            // Si tus palabras en el diccionario están en minúsculas, 
+            // asegúrate de comparar correspondientemente (ej: toupper(palabra[i]))
+            if (toupper(palabra[i]) == letra) {
                 adivinadas[i] = 1;
                 acerto = 1;
                 letras_correctas++;
@@ -131,17 +152,26 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
 
         if (!acerto) {
             errores++;
-            printf("Esa letra no esta en la palabra\n");
+            strcpy(mensaje_feedback, "Esa letra NO esta en la palabra. :(");
         } else {
-            printf("¡Bien! esa letra si esta\n");
+            strcpy(mensaje_feedback, "¡Bien! Esa letra SI esta. :)");
         }
     }
 
-    dibujar_ahorcado(errores);
+    // --- PANTALLA FINAL ---
+    clear();
+    dibujar_ahorcado(errores, 3);
+    mostrar_progreso(palabra, adivinadas, largo, 5, 30);
 
     if (letras_correctas == largo) {
-        printf("¡Felicidades! ganaste :) La palabra era: %s\n", palabra);
+        mvprintw(13, 5, "¡Felicidades! GANASTE :) La palabra era: %s", palabra);
     } else {
-        printf("Perdiste :( la palabra era: %s\n", palabra);
+        mvprintw(13, 5, "Perdiste :( La palabra era: %s", palabra);
     }
+
+    mvprintw(16, 5, "Presiona cualquier tecla para salir...");
+    refresh();
+    
+    getch();     // Espera una última tecla antes de cerrar
+    endwin();    // Cerrar NCURSES (Regresa la terminal a su estado original) 
 }
