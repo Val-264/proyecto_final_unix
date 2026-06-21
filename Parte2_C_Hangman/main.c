@@ -83,27 +83,31 @@ int main() {
         mvprintw(3, 10,"               MENU");
         mvprintw(4, 10,"------------------------------------");
         mvprintw(5, 10,"1. Jugar");
-        mvprintw(6, 10,"2. Salir");
-        mvprintw(7, 10,"------------------------------------");
-        mvprintw(8, 10,"Elige una opcion: ");
+        mvprintw(6, 10,"2. Agregar nueva palabra al juego");
+        mvprintw(7, 10,"3. Salir");
+        mvprintw(8, 10,"------------------------------------");
+        mvprintw(9, 10,"Elige una opcion: ");
 
         // Leer la entrada ddel usuario
         echo();
         char entrada[10];
-        mvgetnstr(8, 28, entrada, 9); // Leer la opción en la coordenada del prompt
+        mvgetnstr(9, 28, entrada, 9); // Leer la opción en la coordenada del prompt
         noecho(); // Lo volvemos a apagar para el juego
 
         opcion = atoi(entrada); // Convertir la cadena a entero 
 
         if (opcion == 1) {
             jugar_partida(palabras, total_palabras);
-        } else if (opcion != 2) {
+        } else if (opcion == 2) {
+            agregar_palabra("palabras.txt");
+            total_palabras = cargar_palabras("palabras.txt", palabras);
+        } else if (opcion != 3){
             mvprintw(10, 10, "Opcion invalida, intenta de nuevo. Presiona una tecla...");
             refresh();
             getch();
-        }
+        } 
 
-    } while (opcion != 2);
+    } while (opcion != 3);
 
     printf("¡Gracias por jugar Hasta luego!\n");
 

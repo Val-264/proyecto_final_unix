@@ -5,6 +5,69 @@
 #include <ctype.h>
 #include "ahorcado.h"
 
+void agregar_palabra(const char *nombre_archivo) {
+    clear();
+    mvprintw(2, 10, "------------------------------------");
+    mvprintw(3, 10, "       AGREGAR NUEVA PALABRA        ");
+    mvprintw(4, 10, "------------------------------------");
+    mvprintw(6, 10, "Escribe la palabra (o Enter para cancelar):");
+    refresh();
+
+    echo(); 
+    char nueva_palabra[MAX_PALABRA];
+    mvgetnstr(7, 10, nueva_palabra, MAX_PALABRA - 1);
+    noecho();
+
+    int largo = strlen(nueva_palabra);
+
+    if (largo > 0) {
+        // Convertir toda la palabra a mayúsculas por consistencia
+        for(int i = 0; i < largo; i++){
+            nueva_palabra[i] = toupper(nueva_palabra[i]);
+        }
+
+        // Verificar si la palabra ya existe
+        int existe = 0;
+        FILE *archivo_lectura = fopen(nombre_archivo, "r");
+        if (archivo_lectura != NULL) {
+            char palabra_leida[MAX_PALABRA];
+            while (fgets(palabra_leida, MAX_PALABRA, archivo_lectura) != NULL) {
+                palabra_leida[strcspn(palabra_leida, "\r\n")] = '\0'; // Limpiar salto de línea
+                if (strcmp(palabra_leida, nueva_palabra) == 0) {
+                    existe = 1; 
+                    break;
+                }
+            }
+            fclose(archivo_lectura);
+        }
+
+        if (existe) {
+            attron(COLOR_PAIR(2)); // ROJO
+            mvprintw(10, 10, "Aviso: La palabra '%s' ya existe en el diccionario.", nueva_palabra);
+            attroff(COLOR_PAIR(2));
+        } else {
+            // Abrir el archivo en modo "a" (append / añadir)
+            FILE *archivo_escritura = fopen(nombre_archivo, "a");
+            if (archivo_escritura != NULL) {
+                fprintf(archivo_escritura, "%s\n", nueva_palabra);
+                fclose(archivo_escritura);
+                
+                attron(COLOR_PAIR(1)); // VERDE
+                mvprintw(10, 10, "¡Palabra '%s' agregada con exito!", nueva_palabra);
+                attroff(COLOR_PAIR(1));
+            } else {
+                mvprintw(10, 10, "Error: No se pudo modificar el archivo %s", nombre_archivo);
+            }
+        }
+    } else {
+        mvprintw(10, 10, "Operacion cancelada. No se escribio nada.");
+    }
+
+    mvprintw(12, 10, "Presiona cualquier tecla para volver al menu...");
+    refresh();
+    getch();
+}
+
 int cargar_palabras(const char *nombre_archivo, char palabras[MAX_PALABRAS][MAX_PALABRA]) {
     FILE *archivo = fopen(nombre_archivo, "r");
     if (archivo == NULL) {

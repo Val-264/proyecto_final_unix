@@ -7,6 +7,9 @@
 #define MAX_INTENTOS 6
 #define MAX_PALABRAS 100
 
+// añade palabras a palabras.txt
+void agregar_palabra(const char *nombre_archivo);
+
 // lee el archivo de palabras y devuelve cuantas palabras encontro
 int cargar_palabras(const char *nombre_archivo, char palabras[MAX_PALABRAS][MAX_PALABRA]);
 
