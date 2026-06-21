@@ -3,7 +3,6 @@
 #include <string.h>
 #include <time.h>
 #include <ctype.h>
-#include <ncurses.h> 
 #include "ahorcado.h"
 
 int cargar_palabras(const char *nombre_archivo, char palabras[MAX_PALABRAS][MAX_PALABRA]) {
@@ -80,12 +79,6 @@ int letra_ya_usada(char letra, char *usadas, int cantidad_usadas) {
 }
 
 void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
-    // --- 1. INICIALIZAR NCURSES ---
-    initscr();
-    cbreak();
-    noecho();
-    keypad(stdscr, TRUE);
-
     char palabra[MAX_PALABRA];
     elegir_palabra(palabras, total, palabra);
 
@@ -173,5 +166,4 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
     refresh();
     
     getch();     // Espera una última tecla antes de cerrar
-    endwin();    // Cerrar NCURSES (Regresa la terminal a su estado original) 
 }

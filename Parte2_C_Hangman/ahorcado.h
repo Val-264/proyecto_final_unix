@@ -1,6 +1,8 @@
 #ifndef AHORCADO_H
 #define AHORCADO_H
 
+#include <ncurses.h> 
+
 #define MAX_PALABRA 50
 #define MAX_INTENTOS 6
 #define MAX_PALABRAS 100

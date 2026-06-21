@@ -4,7 +4,7 @@ OBJS = main.o ahorcado.o
 EJECUTABLE = hangman
 
 $(EJECUTABLE): $(OBJS)
-	$(CC) $(CFLAGS) -o $(EJECUTABLE) $(OBJS) -lncurses
+	$(CC) $(CFLAGS) -o $(EJECUTABLE) $(OBJS) -lncursesw
 
 main.o: main.c ahorcado.h
 	$(CC) $(CFLAGS) -c main.c
