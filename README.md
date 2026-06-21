@@ -8,10 +8,13 @@ Gestor de películas/series en Shell Script + Juego del Ahorcado en C.
 - **Parte2_C_Hangman/** — Juego del ahorcado en C, compilado con Makefile
 
 ## Cómo correrlo
+### 1.1 Requisitos
 
-### 1. Requisitos (Windows con WSL)
+Si trabajas en un sistema operativo de tipo UNIX o GNU/Linux continúa en el paso 2.
 
-Si no tienes WSL instalado, en PowerShell como administrador:
+### 1.2 Requisitos (Windows con WSL)
+
+Si no tienes WSL instalado, abre PowerShell como administrador e ingresa el comando:
 
 ```bash
 wsl --install
@@ -23,7 +26,6 @@ Dentro de tu terminal Ubuntu, instala las herramientas necesarias:
 sudo apt update
 sudo apt install build-essential git -y
 ```
-
 ### 2. Clonar el repositorio
 
 ```bash
