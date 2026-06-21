@@ -25,6 +25,9 @@ void mostrar_progreso(const char *palabra, int *adivinadas, int largo, int f, in
 // revisa si una letra ya fue usada antes
 int letra_ya_usada(char letra, char *usadas, int cantidad_usadas);
 
+// muestra el abecedario en pantalla
+void mostrar_abecedario(int f_base, int c_base, const char *palabra, char *usadas, int cantidad_usadas);
+
 // el juego completo de una partida
 void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total);
 

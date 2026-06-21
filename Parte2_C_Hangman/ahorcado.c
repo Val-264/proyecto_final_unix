@@ -141,6 +141,58 @@ int letra_ya_usada(char letra, char *usadas, int cantidad_usadas) {
     return 0;
 }
 
+void mostrar_abecedario(int f_base, int c_base, const char *palabra, char *usadas, int cantidad_usadas) {
+    attron(A_BOLD);
+    mvprintw(f_base, c_base, "Panel de letras:");
+    attroff(A_BOLD);
+
+    int fila_actual = f_base + 2;
+    int col_actual = c_base;
+
+    for (char letra = 'A'; letra <= 'Z'; letra++) {
+        int usada = 0;
+        int correcta = 0;
+
+        // Verificar si la letra actual ya fue usada por el jugador
+        for (int i = 0; i < cantidad_usadas; i++) {
+            if (usadas[i] == letra) {
+                usada = 1;
+                // Si fue usada, verificar si es parte de la palabra secreta
+                for (int j = 0; palabra[j] != '\0'; j++) {
+                    if (toupper(palabra[j]) == letra) {
+                        correcta = 1;
+                        break;
+                    }
+                }
+                break;
+            }
+        }
+
+        // Pintar la letra según su estado
+        if (usada) {
+            if (correcta) {
+                attron(COLOR_PAIR(1) | A_BOLD); // Pareja 1 (Verde)
+                mvprintw(fila_actual, col_actual, "%c", letra);
+                attroff(COLOR_PAIR(1) | A_BOLD);
+            } else {
+                attron(COLOR_PAIR(2) | A_BOLD); // Pareja 2 (Rojo)
+                mvprintw(fila_actual, col_actual, "%c", letra);
+                attroff(COLOR_PAIR(2) | A_BOLD);
+            }
+        } else {
+            // Letra disponible (se imprime normal)
+            mvprintw(fila_actual, col_actual, "%c", letra);
+        }
+
+        // Diseño en cuadrícula (7 columnas por fila para estructurar el teclado)
+        col_actual += 3; // Espacio entre letras
+        if ((letra - 'A' + 1) % 7 == 0) { 
+            fila_actual += 2;  // Saltar de renglón dejando un espacio vertical
+            col_actual = c_base; // Regresar a la primera columna del panel
+        }
+    }
+}
+
 void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
     char palabra[MAX_PALABRA];
     elegir_palabra(palabras, total, palabra);
@@ -167,10 +219,7 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
         mostrar_progreso(palabra, adivinadas, largo, 5, 30); // Fila 5, Columna 30
 
         // Mostrar letras usadas a la derecha
-        mvprintw(7, 30, "Letras usadas: ");
-        for (int i = 0; i < cantidad_usadas; i++) {
-            printw("%c ", letras_usadas[i]);
-        }
+        mostrar_abecedario(7, 50, palabra, letras_usadas, cantidad_usadas);
 
         // Mostrar el resultado de la última acción debajo
         mvprintw(13, 5, "%s", mensaje_feedback);
@@ -216,7 +265,12 @@ void jugar_partida(char palabras[MAX_PALABRAS][MAX_PALABRA], int total) {
 
     // --- PANTALLA FINAL ---
     clear();
-    dibujar_ahorcado(errores, 3);
+    if (errores >= 6) {
+        attron(COLOR_PAIR(2) | A_BOLD);
+        dibujar_ahorcado(errores, 3);
+        attroff(COLOR_PAIR(2) | A_BOLD);
+    }
+    else {dibujar_ahorcado(errores, 3);}
     mostrar_progreso(palabra, adivinadas, largo, 5, 30);
 
     if (letras_correctas == largo) {

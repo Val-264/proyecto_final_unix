@@ -4,7 +4,7 @@
 #include "ahorcado.h"
 
 void mostrar_bienvenida(int f_inicio, int c_inicio) {
-    char titulo_bienvenida[15][47] = {
+    char titulo_bienvenida[13][47] = {
     {'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'},
     {'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'},
     {'.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.','.'},
@@ -22,11 +22,15 @@ void mostrar_bienvenida(int f_inicio, int c_inicio) {
 
     };
 
-    attron(COLOR_PAIR(1) | A_BOLD);
+    attron(COLOR_PAIR(3) | A_BOLD);
     for (int f = 0; f < 13; f++)
     {
         for (int c = 0; c < 47; c++)
         {
+            if (f > 2 && f < 10) {
+                napms(10);
+                refresh();
+            }
             switch (titulo_bienvenida[f][c])
             {
             case '#': 
@@ -41,7 +45,7 @@ void mostrar_bienvenida(int f_inicio, int c_inicio) {
         }
     }
 
-    attroff(COLOR_PAIR(1) | A_BOLD);
+    attroff(COLOR_PAIR(3) | A_BOLD);
 
 }
 
@@ -66,6 +70,8 @@ int main() {
     // Definir colores
     init_pair(1, COLOR_GREEN, COLOR_BLACK);
     init_pair(2, COLOR_RED, COLOR_BLACK);
+    init_pair(3, COLOR_BLUE, COLOR_BLACK);
+    init_pair(4, COLOR_YELLOW, COLOR_BLACK);
     
     clear();
     mostrar_bienvenida(2, 10);
@@ -75,39 +81,73 @@ int main() {
     getch(); // Espera la acción del usuario
 
    
-    int opcion;
+    int opcion_seleccionada = 0; // 0 = Jugar, 1 = Agregar, 2 = Salir
+    const int num_opciones = 3;
+    char *opciones[] = {
+        "Jugar",
+        "Agregar nueva palabra al juego",
+        "Salir"
+    };
+    int tecla;
+    int salir_juego = 0;
 
     do {
-        clear();
-        mvprintw(2, 10,"------------------------------------");
-        mvprintw(3, 10,"               MENU");
-        mvprintw(4, 10,"------------------------------------");
-        mvprintw(5, 10,"1. Jugar");
-        mvprintw(6, 10,"2. Agregar nueva palabra al juego");
-        mvprintw(7, 10,"3. Salir");
-        mvprintw(8, 10,"------------------------------------");
-        mvprintw(9, 10,"Elige una opcion: ");
+        while(1) {
+            clear();
+            attron(COLOR_PAIR(4) | A_BOLD);
+            mvprintw(2, 10, "------------------------------------");
+            mvprintw(3, 10, "               MENU                 ");
+            mvprintw(4, 10, "------------------------------------");
+            attroff(COLOR_PAIR(4) | A_BOLD);
 
-        // Leer la entrada ddel usuario
-        echo();
-        char entrada[10];
-        mvgetnstr(9, 28, entrada, 9); // Leer la opción en la coordenada del prompt
-        noecho(); // Lo volvemos a apagar para el juego
+            // Imprimir las opciones iterando sobre el arreglo
+            for(int i = 0; i < num_opciones; i++) {
+                if(i == opcion_seleccionada) {
+                    attron(A_REVERSE); // Encender el resaltado (fondo blanco, texto negro)
+                }
+                
+                // Imprimir la opción con un espacio extra para que el bloque resaltado se vea bonito
+                mvprintw(5 + i, 10, " %s ", opciones[i]);
+                
+                if(i == opcion_seleccionada) {
+                    attroff(A_REVERSE); // Apagar el resaltado para la siguiente línea
+                }
+            }
 
-        opcion = atoi(entrada); // Convertir la cadena a entero 
+            mvprintw(9, 10, "------------------------------------");
+            mvprintw(10, 10, "Usa las flechas Arriba/Abajo y presiona Enter");
+            refresh();
 
-        if (opcion == 1) {
+            // Capturar la tecla presionada
+            tecla = getch();
+
+            if (tecla == KEY_UP) {
+                opcion_seleccionada--;
+                if (opcion_seleccionada < 0) {
+                    opcion_seleccionada = num_opciones - 1; // Si se sube desde el tope, bajar al final
+                }
+            } else if (tecla == KEY_DOWN) {
+                opcion_seleccionada++;
+                if (opcion_seleccionada >= num_opciones) {
+                    opcion_seleccionada = 0; // Si se baja desde el final, subir al inicio
+                }
+            } else if (tecla == '\n' || tecla == KEY_ENTER || tecla == 10) { 
+                // Salir del bucle interno si se presionó enter 
+                break; 
+            }
+        }
+
+        // --- Lógica de la opción seleccionada (se ejecuta al dar Enter) ---
+        if (opcion_seleccionada == 0) {
             jugar_partida(palabras, total_palabras);
-        } else if (opcion == 2) {
+        } else if (opcion_seleccionada == 1) {
             agregar_palabra("palabras.txt");
             total_palabras = cargar_palabras("palabras.txt", palabras);
-        } else if (opcion != 3){
-            mvprintw(10, 10, "Opcion invalida, intenta de nuevo. Presiona una tecla...");
-            refresh();
-            getch();
+        } else if (opcion_seleccionada == 2) {
+            salir_juego = 1;
         } 
 
-    } while (opcion != 3);
+    } while (!salir_juego);
 
     printf("¡Gracias por jugar Hasta luego!\n");
 
